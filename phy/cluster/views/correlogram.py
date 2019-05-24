@@ -7,14 +7,23 @@
 # Imports
 # -----------------------------------------------------------------------------
 
+import sys
 import logging
-
 import numpy as np
+import warnings
 
+import matplotlib.pyplot as plt
+from statsmodels.nonparametric.smoothers_lowess import lowess
 from phy.utils import Bunch
 from phy.utils._color import _spike_colors
 from .base import ManualClusteringView
+import scipy as sp
+from scipy import optimize
 
+from phy_plugins.phyFeaturesAppendix import plot_ACG_features, plot_CCG_features
+from phy_plugins.peakdetect import peakdetect
+
+#from phyFeaturesAppendix import scale, d
 logger = logging.getLogger(__name__)
 
 
@@ -73,7 +82,8 @@ class CorrelogramView(ManualClusteringView):
 
     def _plot_correlograms(self, ccg):
         n_clusters = ccg.shape[0]
-        ylim = [ccg.max()] if not self.uniform_normalization else None
+        normalized = self.uniform_normalization
+        ylim = [ccg.max()] if not normalized else None
         colors = _spike_colors(np.arange(n_clusters), alpha=1.)
         for i, j in self._iter_subplots(n_clusters):
             hist = ccg[i, j, :]
@@ -82,7 +92,18 @@ class CorrelogramView(ManualClusteringView):
                             color=color,
                             ylim=ylim,
                             )
+            pos1ms = 2./(self[i,j].window_size*1000)
+            self[i, j].lines(pos=[[-pos1ms, -1, -pos1ms, 0],
+                            [pos1ms, -1, pos1ms, 0]],
+                            color=(1., 1., 1., .5))
 
+            if i==j: # Only ACG, not crossCG
+                plot_ACG_features(self[i,j], hist.copy())
+
+            elif i!=j:
+                plot_CCG_features(self[i,j], hist.copy())
+            
+            
     def _plot_labels(self, cluster_ids):
         n = len(cluster_ids)
         for k in range(n):
@@ -96,7 +117,23 @@ class CorrelogramView(ManualClusteringView):
                                 anchor=[0., -1.04],
                                 data_bounds=None,
                                 )
-
+            for kk in range(n):
+                # Added by Maxime Beau, 24/06/2018 -> scale bar
+                # Careful!! If error here, phy will simply return "Error: No such command "template-gui"."   
+                color=(0.8, 0.8, 0.8, .7)
+                if k==kk:
+                    color=(0.8, 0.8, 0.8, .7)
+                n_scales = 10
+                for i in range(n_scales+1):
+                # Both axis go from -1 to 1, center of the plot is 0,0.
+                    x = -1+i*2./n_scales
+                    self[k, kk].lines(pos=[[x, -0.8, x, -1.]],
+                                color=color,)
+                    if i!=0:
+                        x_small = x-(2./n_scales)/2
+                        self[k, kk].lines(pos=[[x_small, -0.9, x_small, -1]],
+                                    color=color,)
+                        
     def on_select(self, cluster_ids=None, **kwargs):
         super(CorrelogramView, self).on_select(cluster_ids, **kwargs)
         cluster_ids = self.cluster_ids
