@@ -282,6 +282,8 @@ class WaveformLoader(object):
             nc = self.n_channels
         else:
             channels = np.asarray(channels, dtype=np.int32)
+            print('phy/traces/waveform l.285 channels', channels)
+            print('phy/traces/waveform l.285 self.n_channels', self.n_channels)
             assert np.all(channels < self.n_channels)
             nc = len(channels)
 
