@@ -14,3 +14,4 @@ dependencies:
     - six
     - joblib
     - click
+    - git+https://github.com/m-beau/phy_plugins.git
