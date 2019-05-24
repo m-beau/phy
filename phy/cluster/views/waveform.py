@@ -10,7 +10,9 @@
 from collections import defaultdict
 import logging
 
+import sys
 import numpy as np
+from scipy import interpolate
 from vispy.util.event import Event
 
 from phy.io.array import _flatten, _index_of
@@ -19,6 +21,7 @@ from phy.plot.utils import _get_boxes
 from phy.utils import Bunch
 from phy.utils._color import _colormap
 from .base import ManualClusteringView
+from phy_plugins.phyFeaturesAppendix import plot_wvf_feat_vispy
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +89,7 @@ class WaveformView(ManualClusteringView):
     def __init__(self,
                  waveforms=None,
                  channel_labels=None,
+                 waveforms_set = None,
                  **kwargs):
         self._key_pressed = None
         self._overlap = False
@@ -112,7 +116,8 @@ class WaveformView(ManualClusteringView):
 
         # Data: functions cluster_id => waveforms.
         self.waveforms = waveforms
-
+        self.waveforms_set = waveforms_set # Set of 100 raw waveforms, irrespectively of m/w commands, on all channels
+        
     def _plot_labels(self, channel_ids, n_clusters, channel_labels=None):
         # Add channel labels.
         if self.do_show_labels:
@@ -199,7 +204,17 @@ class WaveformView(ManualClusteringView):
                        box_index=box_index,
                        data_bounds=None,
                        )
+            
+        for i, d in enumerate(bunchs_set):
+            wave = d.data ##### Equivalent to the data of module CellTypes.py
+            clIds = str(cluster_ids).replace(' ', '')
+            color = tuple(_colormap(i)) + (alpha,)
+            color=color[:3]+(0.3,)
+            #np.save('/home/ms047/Desktop/waveform385%s.npy'%clIds, wave)
+            # Generate the waveform array.
+            plot_wvf_feat_vispy(self, wave, color, i)
 
+            
     def on_select(self, cluster_ids=None, **kwargs):
         super(WaveformView, self).on_select(cluster_ids, **kwargs)
         cluster_ids = self.cluster_ids
@@ -210,7 +225,9 @@ class WaveformView(ManualClusteringView):
         # Retrieve the waveform data.
         bunchs = [self.waveforms(cluster_id)
                   for cluster_id in cluster_ids]
-
+        bunchs_set = [self.waveforms_set(cluster_id, channel_ids=np.arange(0, 384, 1)) # MAXIME: SHOULD BE 384!!
+                  for cluster_id in cluster_ids]
+        
         # All channel ids appearing in all selected clusters.
         channel_ids = sorted(set(_flatten([d.channel_ids for d in bunchs])))
         box_bounds = _get_box_bounds(bunchs, channel_ids)
