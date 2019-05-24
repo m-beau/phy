@@ -90,7 +90,7 @@ class WaveformView(ManualClusteringView):
                  waveforms=None,
                  channel_labels=None,
                  waveforms_set = None,
-                 datadir=''.
+                 datadir='',
                  **kwargs):
         self._key_pressed = None
         self._overlap = False
