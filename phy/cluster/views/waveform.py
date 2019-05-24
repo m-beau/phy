@@ -90,6 +90,7 @@ class WaveformView(ManualClusteringView):
                  waveforms=None,
                  channel_labels=None,
                  waveforms_set = None,
+                 datadir=''.
                  **kwargs):
         self._key_pressed = None
         self._overlap = False
@@ -97,7 +98,7 @@ class WaveformView(ManualClusteringView):
         self.channel_ids = None
         self.channel_labels = channel_labels
         self.filtered_tags = ()
-        self.datadir=kwargs['datadir']
+        self.datadir=datadir
 
         # Initialize the view.
         super(WaveformView, self).__init__(layout='boxed',
