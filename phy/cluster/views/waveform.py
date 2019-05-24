@@ -97,6 +97,7 @@ class WaveformView(ManualClusteringView):
         self.channel_ids = None
         self.channel_labels = channel_labels
         self.filtered_tags = ()
+        self.datadir=kwargs['datadir']
 
         # Initialize the view.
         super(WaveformView, self).__init__(layout='boxed',
@@ -225,7 +226,9 @@ class WaveformView(ManualClusteringView):
         # Retrieve the waveform data.
         bunchs = [self.waveforms(cluster_id)
                   for cluster_id in cluster_ids]
-        bunchs_set = [self.waveforms_set(cluster_id, channel_ids=np.arange(0, 384, 1)) # MAXIME: SHOULD BE 384!!
+        np.load(op.join(self.datadir, 'channel_map.npy'), mmap_mode='r').squeeze().shape[0]
+        map_nchannels = 
+        bunchs_set = [self.waveforms_set(cluster_id, channel_ids=np.arange(0, map_nchannels, 1)) # MAXIME: SHOULD BE 384!!
                   for cluster_id in cluster_ids]
         
         # All channel ids appearing in all selected clusters.
