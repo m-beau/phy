@@ -139,7 +139,7 @@ class WaveformView(ManualClusteringView):
                              data_bounds=None,
                              )
 
-    def _plot_waveforms(self, bunchs, channel_ids):
+    def _plot_waveforms(self, bunchs, bunchs_set, channel_ids, cluster_ids):
         # Initialize the box scaling the first time.
         if self.box_scaling[1] == 1.:
             M = np.max([np.max(np.abs(b.data)) for b in bunchs])
