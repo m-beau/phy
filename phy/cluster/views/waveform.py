@@ -11,6 +11,7 @@ from collections import defaultdict
 import logging
 
 import sys
+import os.path as op
 import numpy as np
 from scipy import interpolate
 from vispy.util.event import Event
