@@ -244,7 +244,7 @@ class WaveformView(ManualClusteringView):
         self._update_boxes()
 
         with self.building():
-            self._plot_waveforms(bunchs, channel_ids)
+            self._plot_waveforms(bunchs, bunchs_set, channel_ids, cluster_ids)
             self._plot_labels(channel_ids, n_clusters)
 
     @property
