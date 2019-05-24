@@ -227,8 +227,7 @@ class WaveformView(ManualClusteringView):
         # Retrieve the waveform data.
         bunchs = [self.waveforms(cluster_id)
                   for cluster_id in cluster_ids]
-        np.load(op.join(self.datadir, 'channel_map.npy'), mmap_mode='r').squeeze().shape[0]
-        map_nchannels = 
+        map_nchannels = np.load(op.join(self.datadir, 'channel_map.npy'), mmap_mode='r').squeeze().shape[0]
         bunchs_set = [self.waveforms_set(cluster_id, channel_ids=np.arange(0, map_nchannels, 1)) # MAXIME: SHOULD BE 384!!
                   for cluster_id in cluster_ids]
         
