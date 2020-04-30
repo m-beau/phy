@@ -25,13 +25,42 @@ logger = logging.getLogger(__name__)
 # Trace view
 # -----------------------------------------------------------------------------
 
-def select_traces(traces, interval, sample_rate=None):
+def select_traces(traces, interval, sample_rate=None, whiten=1, tmedian_substract=1):
     """Load traces in an interval (in seconds)."""
     start, end = interval
     i, j = round(sample_rate * start), round(sample_rate * end)
     i, j = int(i), int(j)
     traces = traces[i:j]
     traces = traces - np.median(traces, axis=0)
+    
+    # Whiten to remove correlated artefacts from the trace view
+    if whiten:
+        # Compute whitening matrix
+        fudge=1e-18
+        x=traces
+        assert x.ndim == 2
+        ns, nc = x.shape
+        x_cov = np.cov(x, rowvar=0)
+        assert x_cov.shape == (nc, nc)
+        d, v = np.linalg.eigh(x_cov)
+        d = np.diag(1. / np.sqrt(d + fudge))
+        w = np.dot(np.dot(v, d), v.T)
+
+        # Whiten
+        x_scales=(np.max(x, 0)-np.min(x, 0))
+        x=np.dot(x,w)
+        xW_scales=(np.max(x, 0)-np.min(x, 0))
+        x=x.T*np.repeat((x_scales/xW_scales).reshape(x.T.shape[0], 1), x.T.shape[1], axis=1)
+        traces=x.T
+    
+    # Median-substract in time to have channels centered in the trace view
+    if tmedian_substract:
+        x=traces.T
+        offsets = np.median(x, axis=1)
+        offsets = np.tile(offsets[:,np.newaxis], (1, x.shape[1]))
+        x-=offsets
+        traces=x.T
+    
     return traces
 
 
