@@ -44,7 +44,7 @@ Run the following commands in a terminal:
 1. Create a new conda environment with the conda dependencies:
 
     ```
-    conda create -n phy2 -y cython dask h5py joblib matplotlib numpy pillow pip pyopengl pyqt pyqtwebengine pytest python qtconsole requests responses scikit-learn scipy traitlets
+    conda create -n phy2 -y python=3.11.7 cython dask h5py joblib matplotlib numpy pillow pip pyopengl pyqt pyqtwebengine pytest python qtconsole requests responses scikit-learn scipy traitlets
     ```
 
 2. Activate the new conda environment with `conda activate phy2`
